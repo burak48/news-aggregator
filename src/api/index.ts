@@ -18,12 +18,12 @@ function createApiEndpoint(source: string, keyword = "", date = "", category = "
   switch (source) {
     case "newsApi":
       return {
-        baseURL: `${import.meta.env.VITE_APP_NEWSAPI_API_URL}/v2/top-headlines?q=${keyword}&category=${category}&from=${date}`,
+        baseURL: `${import.meta.env.VITE_APP_NEWSAPI_API_URL}/v2/top-headlines?q=${keyword}&category=${category}&from=${date}&country=us`,
         apiKey: import.meta.env.VITE_APP_NEWSAPI_KEY,
       };
     case "theGuardian":
       return {
-        baseURL: `${import.meta.env.VITE_APP_THEGUARDIAN_API_URL}/search?q=${keyword}&from-date=${date}&api-key=${import.meta.env.VITE_APP_THEGUARDIAN_API_KEY}`,
+        baseURL: `${import.meta.env.VITE_APP_THEGUARDIAN_API_URL}/search?q=${keyword}&from-date=${date}&lang=en&api-key=${import.meta.env.VITE_APP_THEGUARDIAN_API_KEY}`,
       };
     case "newYorkTimes":
       return {

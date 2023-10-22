@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { getNews } from "../../api/index";
 import { useNavigate } from "react-router-dom";
+import Loader from "../Loader";
 
 function SearchAndFilter() {
   const navigate = useNavigate();
@@ -12,17 +13,33 @@ function SearchAndFilter() {
     source: "",
   };
   const [searchParams, setSearchParams] = useState(initSearchParams);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSearch = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
-    const response = await getNews(searchParams);
 
-    if (response && response.articles) {
-      navigate("/news", { state: { data: response.articles } }); // Use response.articles here
-    } else if (response.response && response.response.results) {
-        navigate("/news", { state: { data: response.response.results } }); // Use response.results here
-    } else if (response.response && response.response.docs) {
-        navigate("/news", { state: { data: response.response.docs } }); // Use response.docs here
+    if (!searchParams.keyword || !searchParams.source || !searchParams.date) {
+      setError("Please fill in all required fields.");
+    } else {
+      setError("");
+      setIsLoading(true);
+
+      try {
+        const response = await getNews(searchParams);
+
+        if (response && response.articles) {
+          navigate("/news", { state: { data: response.articles } }); // Use response.articles here
+        } else if (response.response && response.response.results) {
+          navigate("/news", { state: { data: response.response.results } }); // Use response.results here
+        } else if (response.response && response.response.docs) {
+          navigate("/news", { state: { data: response.response.docs } }); // Use response.docs here
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -55,6 +72,7 @@ function SearchAndFilter() {
       <div className="min-h-full flex flex-col items-center justify-center">
         <div className="p-6 rounded-lg shadow-lg bg-gray-50 w-auto md:w-1/3">
           <form onSubmit={handleSearch}>
+            {error && <p className="text-red-500 mb-2">{error}</p>}
             <div className="mb-4">
               <input
                 type="text"
@@ -74,7 +92,8 @@ function SearchAndFilter() {
               <select
                 value={searchParams.category}
                 onChange={(e) => handleInputChange("category", e.target.value)}
-                className="p-2 border rounded-md w-full sm:w-1/2"
+                className={`p-2 border rounded-md w-full sm:w-1/2 ${searchParams.source !== "newsApi" ? "text-gray-400" : ""}`}
+                disabled={searchParams.source !== "newsApi"}
               >
                 <option value="">Select Category</option>
                 {searchParams.source === "newsApi" &&
@@ -101,7 +120,7 @@ function SearchAndFilter() {
                 type="submit"
                 className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 w-full"
               >
-                Search
+                {isLoading ? <Loader /> : "Search"}
               </button>
             </div>
           </form>
