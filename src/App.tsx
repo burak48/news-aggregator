@@ -1,15 +1,15 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SearchAndFilter from "./components/SearchAndFilter";
+import NewsList from "./components/NewsList";
 
 function App() {
   return (
-    <>
-      <div>
-        <h1 className="text-3xl text-center m-4 font-bold underline">
-          Welcome to News Aggregator!
-        </h1>
-        <SearchAndFilter />
-      </div>
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<SearchAndFilter />} />
+        <Route path="/news" element={<NewsList />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

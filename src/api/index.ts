@@ -18,9 +18,7 @@ function createApiEndpoint(source: string, keyword = "", date = "", category = "
   switch (source) {
     case "newsApi":
       return {
-        baseURL: `${
-          import.meta.env.VITE_APP_NEWSAPI_API_URL
-        }/v2/top-headlines?q=${keyword}&category=${category}&from=${date}`,
+        baseURL: `${import.meta.env.VITE_APP_NEWSAPI_API_URL}/v2/top-headlines?q=${keyword}&category=${category}&from=${date}`,
         apiKey: import.meta.env.VITE_APP_NEWSAPI_KEY,
       };
     case "theGuardian":
@@ -29,9 +27,7 @@ function createApiEndpoint(source: string, keyword = "", date = "", category = "
       };
     case "newYorkTimes":
       return {
-        baseURL: `${
-          import.meta.env.VITE_APP_NEWYORKTIMES_API_URL
-        }/svc/search/v2/articlesearch.json?q=${keyword}&begin_date=${newDate}&api-key=${import.meta.env.VITE_APP_NEWYORKTIMES_API_KEY}`,
+        baseURL: `${import.meta.env.VITE_APP_NEWYORKTIMES_API_URL}/svc/search/v2/articlesearch.json?q=${keyword}&begin_date=${newDate}&api-key=${import.meta.env.VITE_APP_NEWYORKTIMES_API_KEY}`,
       };
     default:
       return null;
@@ -46,7 +42,6 @@ const API_ENDPOINTS: Record<string,(keyword?: string, date?: string, category?: 
 
 export async function getNews(formData: FormData) {
   const selectedSource = formData.source;
-  console.log("selectedSource", selectedSource)
 
   const apiEndpoint = API_ENDPOINTS[selectedSource](
     formData.keyword,
@@ -70,10 +65,7 @@ export async function getNews(formData: FormData) {
         default:
           console.log(`Invalid source selected: ${selectedSource}`)
       }
-      console.log("${selectedSource.toUpperCase(): ", selectedSource.toUpperCase())
-      console.log(`${import.meta.env[`VITE_APP_${selectedSource.toUpperCase()}_API_URL`]}`)
       const api = axios.create({
-        // baseURL: '/api' + apiEndpoint.baseURL.replace('https://api.nytimes.com', ''),
         baseURL: proxyPath + apiEndpoint.baseURL.replace(import.meta.env[`VITE_APP_${selectedSource.toUpperCase()}_API_URL`], ''),
         headers: {
           Authorization: `Bearer ${apiEndpoint.apiKey}`
@@ -83,6 +75,7 @@ export async function getNews(formData: FormData) {
       const response = await api.get("")
       const data = response.data;
       console.log(`Data from ${selectedSource}:`, data);
+      return data;
     } catch (error) {
       console.error(`Error from ${selectedSource}:`, error);
     }
