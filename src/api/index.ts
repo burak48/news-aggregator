@@ -13,35 +13,25 @@ type ApiEndpoint = {
 };
 
 function createApiEndpoint(source: string, keyword = "", date = "", category = "") {
-  console.log("source: ", source);
-  console.log("keyword: ", keyword);
-  console.log("date: ", date);
   const newDate = date.split("-").join("")
-  console.log("newDate: ", newDate)
 
   switch (source) {
     case "newsApi":
       return {
         baseURL: `${
-          import.meta.env.VITE_APP_NEWS_API_URL
+          import.meta.env.VITE_APP_NEWSAPI_API_URL
         }/v2/top-headlines?q=${keyword}&category=${category}&from=${date}`,
-        apiKey: import.meta.env.VITE_APP_NEWS_API_KEY,
-      };
-    case "openNews":
-      return {
-        baseURL: `${
-          import.meta.env.VITE_APP_OPEN_NEWS_API_URL
-        }/api/1/archive?q=${keyword}&category=${category}&from_date=${date}&apikey=${import.meta.env.VITE_APP_OPEN_NEWS_API_KEY}`,
+        apiKey: import.meta.env.VITE_APP_NEWSAPI_KEY,
       };
     case "theGuardian":
       return {
-        baseURL: `${import.meta.env.VITE_APP_GUARDIAN_API_URL}/search?q=${keyword}&from-date=${date}&api-key=${import.meta.env.VITE_APP_GUARDIAN_API_KEY}`,
+        baseURL: `${import.meta.env.VITE_APP_THEGUARDIAN_API_URL}/search?q=${keyword}&from-date=${date}&api-key=${import.meta.env.VITE_APP_THEGUARDIAN_API_KEY}`,
       };
     case "newYorkTimes":
       return {
         baseURL: `${
-          import.meta.env.VITE_APP_NEW_YORK_TIMES_API_URL
-        }/svc/search/v2/articlesearch.json?q=${keyword}&begin_date=${newDate}&api-key=${import.meta.env.VITE_APP_NEW_YORK_TIMES_API_KEY}`,
+          import.meta.env.VITE_APP_NEWYORKTIMES_API_URL
+        }/svc/search/v2/articlesearch.json?q=${keyword}&begin_date=${newDate}&api-key=${import.meta.env.VITE_APP_NEWYORKTIMES_API_KEY}`,
       };
     default:
       return null;
@@ -50,16 +40,13 @@ function createApiEndpoint(source: string, keyword = "", date = "", category = "
 
 const API_ENDPOINTS: Record<string,(keyword?: string, date?: string, category?: string) => ApiEndpoint | null> = {
   newsApi: (keyword: string | undefined, date: string | undefined, category: string | undefined) => createApiEndpoint("newsApi", keyword, date, category),
-  openNews: (keyword: string | undefined, date: string | undefined, category: string | undefined) => createApiEndpoint("openNews", keyword, date, category),
   theGuardian: (keyword: string | undefined, date: string | undefined) => createApiEndpoint("theGuardian", keyword, date),
   newYorkTimes: (keyword: string | undefined, date: string | undefined) => createApiEndpoint("newYorkTimes", keyword, date)
 };
 
 export async function getNews(formData: FormData) {
-  console.log("formData: ", formData);
-
   const selectedSource = formData.source;
-  console.log("API_ENDPOINTS[selectedSource]: ", API_ENDPOINTS[selectedSource]);
+  console.log("selectedSource", selectedSource)
 
   const apiEndpoint = API_ENDPOINTS[selectedSource](
     formData.keyword,
@@ -69,24 +56,29 @@ export async function getNews(formData: FormData) {
 
   if (apiEndpoint) {
     try {
-      // const proxyUrl = 'https://cors-anywhere-herokuapp.com/';
+      let proxyPath;
+      switch(selectedSource) {
+        case "newsApi":
+          proxyPath = "/newsapi";
+          break;
+        case "theGuardian":
+          proxyPath = "/theGuardian";
+          break;
+        case "newYorkTimes":
+          proxyPath = "/nytimes";
+          break;
+        default:
+          console.log(`Invalid source selected: ${selectedSource}`)
+      }
+      console.log("${selectedSource.toUpperCase(): ", selectedSource.toUpperCase())
+      console.log(`${import.meta.env[`VITE_APP_${selectedSource.toUpperCase()}_API_URL`]}`)
       const api = axios.create({
-        // baseURL: selectedSource === "openNews" ? proxyUrl + apiEndpoint.baseURL : apiEndpoint.baseURL,
-        baseURL: apiEndpoint.baseURL,
+        // baseURL: '/api' + apiEndpoint.baseURL.replace('https://api.nytimes.com', ''),
+        baseURL: proxyPath + apiEndpoint.baseURL.replace(import.meta.env[`VITE_APP_${selectedSource.toUpperCase()}_API_URL`], ''),
         headers: {
           Authorization: `Bearer ${apiEndpoint.apiKey}`
         },
       });
-
-      api.interceptors.request.use(
-        (config) => {
-          config.headers['Access-Control-Allow-Origin'] = '*';
-          return config;
-        },
-        (error) => {
-          return Promise.reject(error);
-        }
-      );
 
       const response = await api.get("")
       const data = response.data;

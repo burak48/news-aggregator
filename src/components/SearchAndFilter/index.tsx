@@ -28,7 +28,6 @@ function SearchAndFilter() {
   const sourceOptions = [
     { value: "", label: "Select Source" },
     { value: "newsApi", label: "NewsAPI" },
-    { value: "openNews", label: "OpenNews" },
     { value: "theGuardian", label: "The Guardian" },
     { value: "newYorkTimes", label: "New York Times" },
   ];
